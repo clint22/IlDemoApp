@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -19,9 +20,11 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ileafdemoapp.Activity.LoginActivity;
 import com.example.ileafdemoapp.Utils.SharedPref;
+import com.example.ileafdemoapp.Utils.Validation;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.Status;
@@ -45,6 +48,18 @@ public class MainActivity extends AppCompatActivity
     Spinner spinner_marital_status;
     @BindView(R.id.radio_group_sex)
     RadioGroup radio_group_sex;
+    @BindView(R.id.txt_submit)
+    TextView txt_submit;
+    @BindView(R.id.firstNameWrapper)
+    TextInputLayout firstNameWrapper;
+    @BindView(R.id.lastNameWrapper)
+    TextInputLayout lastNameWrapper;
+    @BindView(R.id.emailWrapper)
+    TextInputLayout emailWrapper;
+    @BindView(R.id.placesWrapper)
+    TextInputLayout placesWrapper;
+    @BindView(R.id.dobWrapper)
+    TextInputLayout dobWrapper;
 
 
     private NavigationView navigationView;
@@ -87,6 +102,7 @@ public class MainActivity extends AppCompatActivity
 
         edttxt_places.setOnClickListener(this);
         edttxt_dob.setOnClickListener(this);
+        txt_submit.setOnClickListener(this);
         spinner_marital_status.setOnItemSelectedListener(this);
         radio_group_sex.setOnCheckedChangeListener(this);
 
@@ -173,8 +189,34 @@ public class MainActivity extends AppCompatActivity
             case R.id.edttxt_dob:
                 openDialogDatePicker();
                 break;
+            case R.id.txt_submit:
+                if (validateFields()) {
+                    Toast.makeText(getApplicationContext(), "Fields validated", Toast.LENGTH_SHORT).show();
+                }
+                break;
 
         }
+    }
+
+    private boolean validateFields() {
+
+        if (!Validation.hasText(firstNameWrapper)) {
+            return false;
+        } else if (!Validation.hasText(lastNameWrapper)) {
+            return false;
+        } else if (!Validation.hasText(emailWrapper)) {
+            return false;
+        } else if (!Validation.hasText(dobWrapper)) {
+            return false;
+        } else if (user_selected_sex == 0) {
+            Toast.makeText(getApplicationContext(),"please choose a sex",Toast.LENGTH_SHORT).show();
+            return false;
+        } else if (!Validation.hasText(placesWrapper)) {
+            return false;
+        }
+
+        return true;
+
     }
 
 
