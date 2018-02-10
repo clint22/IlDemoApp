@@ -19,8 +19,9 @@ public class User {
     public int marital_status;
     public int sex;
     public String location;
+    public int age;
 
-    public User(int id, String first_name, String last_name, String email, String date_of_birth, int marital_status, int sex, String location) {
+    public User(int id, String first_name, String last_name, String email, String date_of_birth, int marital_status, int sex, String location, int age) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;
@@ -29,5 +30,6 @@ public class User {
         this.marital_status = marital_status;
         this.sex = sex;
         this.location = location;
+        this.age = age;
     }
 }

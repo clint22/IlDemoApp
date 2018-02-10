@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ileafdemoapp.Activity.LoginActivity;
+import com.example.ileafdemoapp.Activity.UserDetailsActivity;
 import com.example.ileafdemoapp.Network.AppDatabase;
 import com.example.ileafdemoapp.Network.User;
 import com.example.ileafdemoapp.Utils.SharedPref;
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity
     private int selected_item_id = 0;
     private int mYear, mMonth, mDay;
     private int user_selected_sex;
+    private int age;
     private User user;
     private AppDatabase database;
 
@@ -172,6 +174,11 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_user_dets) {
 
+
+            Intent intent = new Intent(MainActivity.this, UserDetailsActivity.class);
+            startActivity(intent);
+
+
         } else if (id == R.id.nav_logout) {
 
             logout();
@@ -206,12 +213,8 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.txt_submit:
                 if (validateFields()) {
-                    Toast.makeText(getApplicationContext(), "Fields validated", Toast.LENGTH_SHORT).show();
                     connectToDB();
-                    return;
                 }
-                Toast.makeText(getApplicationContext(),"Some error occured", Toast.LENGTH_SHORT).show();
-
                 break;
 
         }
@@ -228,10 +231,12 @@ public class MainActivity extends AppCompatActivity
                     Validation.getString(edttxt_email),
                     Validation.getString(edttxt_dob),
                     selected_item_id,user_selected_sex,
-                    Validation.getString(edttxt_places)));
+                    Validation.getString(edttxt_places),
+                    age));
 
             user = database.userDao().getAllUser().get(0);
-            Toast.makeText(this, String.valueOf(user.first_name), Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, UserDetailsActivity.class);
+            startActivity(intent);
 
         }
     }
@@ -276,9 +281,28 @@ public class MainActivity extends AppCompatActivity
 
                         edttxt_dob.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
 
+                        age = getAge(year,monthOfYear,dayOfMonth);
+
                     }
                 }, mYear, mMonth, mDay);
         datePickerDialog.show();
+
+    }
+
+    private int getAge(int year, int monthOfYear, int dayOfMonth) {
+
+        Calendar today = Calendar.getInstance();
+
+
+        int age = today.get(Calendar.YEAR) - year;
+
+        if (today.get(Calendar.DAY_OF_YEAR) < year){
+            age--;
+        }
+
+        return age;
+
+
 
     }
 
