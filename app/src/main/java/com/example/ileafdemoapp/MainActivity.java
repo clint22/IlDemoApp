@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ileafdemoapp.Activity.LoginActivity;
+import com.example.ileafdemoapp.Network.AppDatabase;
+import com.example.ileafdemoapp.Network.User;
 import com.example.ileafdemoapp.Utils.SharedPref;
 import com.example.ileafdemoapp.Utils.Validation;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -32,6 +34,7 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
 import java.util.Calendar;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,6 +63,12 @@ public class MainActivity extends AppCompatActivity
     TextInputLayout placesWrapper;
     @BindView(R.id.dobWrapper)
     TextInputLayout dobWrapper;
+    @BindView(R.id.edttxt_first_name)
+    EditText edttxt_first_name;
+    @BindView(R.id.edttxt_last_name)
+    EditText edttxt_last_name;
+    @BindView(R.id.edttxt_email)
+    EditText edttxt_email;
 
 
     private NavigationView navigationView;
@@ -68,9 +77,11 @@ public class MainActivity extends AppCompatActivity
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private String TAG = "places";
     private String autocomplete_place;
-    private long selected_item_id = 0;
+    private int selected_item_id = 0;
     private int mYear, mMonth, mDay;
     private int user_selected_sex;
+    private User user;
+    private AppDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +90,10 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        database = AppDatabase.getDatabase(getApplicationContext());
+        // cleanup for testing some initial data
+        database.userDao().removeAllUsers();
+
         initViews();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -192,8 +207,31 @@ public class MainActivity extends AppCompatActivity
             case R.id.txt_submit:
                 if (validateFields()) {
                     Toast.makeText(getApplicationContext(), "Fields validated", Toast.LENGTH_SHORT).show();
+                    connectToDB();
+                    return;
                 }
+                Toast.makeText(getApplicationContext(),"Some error occured", Toast.LENGTH_SHORT).show();
+
                 break;
+
+        }
+    }
+
+    private void connectToDB() {
+
+        List<User> users = database.userDao().getAllUser();
+        if (users.size() == 0) {
+
+            database.userDao().addUser(new User(1,
+                    Validation.getString(edttxt_first_name),
+                    Validation.getString(edttxt_last_name),
+                    Validation.getString(edttxt_email),
+                    Validation.getString(edttxt_dob),
+                    selected_item_id,user_selected_sex,
+                    Validation.getString(edttxt_places)));
+
+            user = database.userDao().getAllUser().get(0);
+            Toast.makeText(this, String.valueOf(user.first_name), Toast.LENGTH_SHORT).show();
 
         }
     }
@@ -283,7 +321,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        selected_item_id = spinner_marital_status.getSelectedItemId();
+        selected_item_id = (int) spinner_marital_status.getSelectedItemId();
         Log.e("selected item", String.valueOf(selected_item_id));
     }
 
