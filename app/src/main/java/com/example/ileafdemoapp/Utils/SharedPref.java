@@ -70,6 +70,7 @@ public class SharedPref {
 
 
 
+
     public static void removeRememberMeUserNameandPassword(Context context) {
         demoapp = getAppSharedPref(context);
         demoapp.edit().remove(SH_REM_USERNAME).apply();
@@ -87,6 +88,9 @@ public class SharedPref {
     }
 
     public static void clear(Context context) {
+
+
+
         demoapp.edit().clear().apply();
 
 

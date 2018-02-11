@@ -28,19 +28,8 @@
             android:drawableTop="@android:drawable/ic_menu_gallery"
             android:gravity="center"
             android:text="Gallery"
-            android:textColor="@color/colorPrimary"
-             />
+            android:textColor="@color/colorPrimary" />
 
-        <TextView
-            android:id="@+id/txtRemoveImg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:drawableTop="@android:drawable/ic_menu_delete"
-            android:gravity="center"
-            android:text="Remove"
-            android:textColor="@color/colorPrimary"
-             />
     </LinearLayout>
 
     <TextView

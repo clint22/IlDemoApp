@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.ileafdemoapp.Adapter.UserDetailAdapter;
 import com.example.ileafdemoapp.MainActivity;
@@ -58,10 +57,8 @@ public class UserDetailsActivity extends AppCompatActivity implements View.OnCli
         if (!users.isEmpty()) {
 
             user = database.userDao().getAllUser().get(0);
-            Toast.makeText(getApplicationContext(), user.first_name, Toast.LENGTH_SHORT).show();
             lin_no_user_details.setVisibility(View.GONE);
             setAdapter();
-            return;
         }
 
 

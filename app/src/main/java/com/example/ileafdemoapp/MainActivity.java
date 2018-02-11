@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -22,7 +23,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -30,6 +30,7 @@ import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +43,7 @@ import com.example.ileafdemoapp.Network.User;
 import com.example.ileafdemoapp.Utils.AppConst;
 import com.example.ileafdemoapp.Utils.SharedPref;
 import com.example.ileafdemoapp.Utils.Validation;
+import com.example.ileafdemoapp.app.MyApplication;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
@@ -89,6 +91,8 @@ public class MainActivity extends AppCompatActivity
     EditText edttxt_last_name;
     @BindView(R.id.edttxt_email)
     EditText edttxt_email;
+    @BindView(R.id.rel_loader)
+    RelativeLayout rel_loader;
 
 
     private TextView txt_user_email;
@@ -117,10 +121,9 @@ public class MainActivity extends AppCompatActivity
 
         result_camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         result_ext_storage = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-
         activity = this;
-        database = AppDatabase.getDatabase(getApplicationContext());
+        database = AppDatabase.getDatabase(MainActivity.this);
+
         database.userDao().removeAllUsers();
 
         initViews();
@@ -316,7 +319,7 @@ public class MainActivity extends AppCompatActivity
 
     private void setData() {
 
-        txt_user_email.setText(SharedPref.getRememberMeUserName(MainActivity.this));
+        txt_user_email.setText(SharedPref.getRememberMeUserName(MyApplication.getInstance()));
     }
 
     @Override
@@ -325,16 +328,28 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+
+            exitApp();
+
+
         }
+
     }
 
-    @Override
+    private void exitApp() {
+
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(homeIntent);
+    }
+
+  /*  @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
-    }
+    }*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -357,10 +372,6 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-      /*  if (id == R.id.nav_home) {
-            // Handle the camera action
-        } else*/
-
         if (id == R.id.nav_user_dets) {
 
 
@@ -381,7 +392,8 @@ public class MainActivity extends AppCompatActivity
 
     private void logout() {
 
-        SharedPref.clear(MainActivity.this);
+//        MyApplication.getInstance().clearApplicationData();
+        SharedPref.clear(MyApplication.getInstance());
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -402,12 +414,22 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.txt_submit:
                 if (validateFields()) {
-                    connectToDB();
+                    rel_loader.setVisibility(View.VISIBLE);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            rel_loader.setVisibility(View.GONE);
+                            connectToDB();
+                        }
+                    }, 2000);
+
                 }
                 break;
 
         }
     }
+
 
     private void connectToDB() {
 

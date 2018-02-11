@@ -7,4 +7,5 @@
     <color name="bg_light_white">#FAFAFA</color>
     <color name="bg_light_green">#4CAF50</color>
     <color name="bg_dark_green">#388E3C</color>
+    <color name="app_trans_black">#25000000</color>
 </resources>

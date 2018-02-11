@@ -14,6 +14,13 @@
         android:orientation="vertical"
         android:layout_height="wrap_content">
 
+
+        <TextView
+            android:layout_width="match_parent"
+            android:text="First Name"
+            android:textColor="#212121"
+            android:layout_height="wrap_content" />
+
         <TextView
             android:id="@+id/txt_user_details"
             android:layout_width="match_parent"
@@ -27,22 +34,16 @@
             android:background="#E0E0E0"/>
 
         <TextView
+            android:layout_width="match_parent"
+            android:text="Last Name"
+            android:layout_marginTop="10dp"
+            android:textColor="#212121"
+            android:layout_height="wrap_content" />
+
+        <TextView
             android:id="@+id/txt_last_name"
             android:layout_width="match_parent"
             android:text="Paul"
-            android:layout_marginTop="10dp"
-            android:textSize="18sp"
-            android:layout_height="wrap_content" />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="10dp"
-            android:background="#E0E0E0"/>
-        <TextView
-            android:id="@+id/txt_age"
-            android:layout_width="match_parent"
-            android:text="23"
-            android:layout_marginTop="10dp"
             android:textSize="18sp"
             android:layout_height="wrap_content" />
         <View
@@ -52,10 +53,34 @@
             android:background="#E0E0E0"/>
 
         <TextView
+            android:layout_width="match_parent"
+            android:text="Age"
+            android:layout_marginTop="10dp"
+            android:textColor="#212121"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/txt_age"
+            android:layout_width="match_parent"
+            android:text="23"
+            android:textSize="18sp"
+            android:layout_height="wrap_content" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:background="#E0E0E0"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:text="Location"
+            android:layout_marginTop="10dp"
+            android:textColor="#212121"
+            android:layout_height="wrap_content" />
+
+        <TextView
             android:id="@+id/txt_location"
             android:layout_width="match_parent"
             android:text="Kaloor"
-            android:layout_marginTop="10dp"
             android:textSize="18sp"
             android:layout_height="wrap_content" />
 

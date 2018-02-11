@@ -34,14 +34,11 @@ public class SelectImageFromFragment extends DialogFragment {
     @BindView(R.id.txtCamera)
     TextView txtCamera;
 
-    @BindView(R.id.txtRemoveImg)
-    TextView txtRemoveImg;
-
     @BindView(R.id.txtMsg)
     TextView txtMsg;
 
     private CallBack mCallback;
-    private boolean showRemoveButton = false;
+
     private boolean cameraPermission = true;
     private boolean galleryPermission = true;
 
@@ -53,23 +50,6 @@ public class SelectImageFromFragment extends DialogFragment {
         this.mCallback = mCallback;
     }
 
-    /**
-     * set status for showing remove button
-     * only show while data is available for remove
-     *
-     * @param status
-     */
-    public void setRemoveStatus(boolean status) {
-        showRemoveButton = status;
-    }
-
-    public void setCameraStatus(boolean status) {
-        cameraPermission = status;
-    }
-
-    public void setGalleryStatus(boolean status) {
-        galleryPermission = status;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -94,7 +74,7 @@ public class SelectImageFromFragment extends DialogFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        txtRemoveImg.setVisibility(showRemoveButton ? View.VISIBLE : View.GONE);
+
         txtCamera.setEnabled(cameraPermission);
         txtGallery.setEnabled(galleryPermission);
 
@@ -122,13 +102,6 @@ public class SelectImageFromFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 setCallBack(AppConst.GALLERY_PICTURE);
-            }
-        });
-
-        txtRemoveImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setCallBack(AppConst.REMOVE_IMAGE);
             }
         });
 
