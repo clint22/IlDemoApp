@@ -14,5 +14,8 @@ public class AppConst {
     public static final int PERMISSION_REQUEST_CODE_CAMERA = 4;
     public static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 5;
     public static final String APP_FOLDER_NAME = "/.IleafApp photos/";
+    public static final int DEFAULT_USER_ID = 1;
+    public static final int USER_SEX_MALE = 1;
+    public static final int USER_SEX_FEMALE = 2;
 
 }

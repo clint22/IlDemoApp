@@ -50,7 +50,7 @@ public class UserDetailAdapter extends RecyclerView.Adapter<UserDetailAdapter.Vi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView txt_user_details,txt_last_name,txt_age,txt_location;
+        public TextView txt_user_details, txt_last_name, txt_age, txt_location;
 
         public ViewHolder(View itemView) {
             super(itemView);

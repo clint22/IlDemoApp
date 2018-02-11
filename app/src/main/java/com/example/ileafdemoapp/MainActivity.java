@@ -22,7 +22,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -116,17 +115,18 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        activity = this;
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        initViews();
 
         result_camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         result_ext_storage = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        activity = this;
-        database = AppDatabase.getDatabase(MainActivity.this);
 
+        database = AppDatabase.getDatabase(MainActivity.this);
         database.userDao().removeAllUsers();
 
-        initViews();
+
 
         NavigationView navigationView1 = (NavigationView) findViewById(R.id.nav_view);
         View v = navigationView1.getHeaderView(0);
@@ -202,7 +202,6 @@ public class MainActivity extends AppCompatActivity
 
 
         mPhotoUri = Validation.getTempUri(MainActivity.this);
-        Log.e("mPhotUri", String.valueOf(mPhotoUri));
 
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
@@ -344,27 +343,7 @@ public class MainActivity extends AppCompatActivity
         startActivity(homeIntent);
     }
 
-  /*  @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }*/
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -392,7 +371,6 @@ public class MainActivity extends AppCompatActivity
 
     private void logout() {
 
-//        MyApplication.getInstance().clearApplicationData();
         SharedPref.clear(MyApplication.getInstance());
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
@@ -407,7 +385,7 @@ public class MainActivity extends AppCompatActivity
 
 
             case R.id.edttxt_places:
-                callAutoCompleteAPI();
+                callAutoCompletePlacesAPI();
                 break;
             case R.id.edttxt_dob:
                 openDialogDatePicker();
@@ -436,7 +414,7 @@ public class MainActivity extends AppCompatActivity
         List<User> users = database.userDao().getAllUser();
         if (users.size() == 0) {
 
-            database.userDao().addUser(new User(1,
+            database.userDao().addUser(new User(AppConst.DEFAULT_USER_ID,
                     Validation.getString(edttxt_first_name),
                     Validation.getString(edttxt_last_name),
                     Validation.getString(edttxt_email),
@@ -536,7 +514,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void callAutoCompleteAPI() {
+    private void callAutoCompletePlacesAPI() {
 
 
         try {
@@ -553,23 +531,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-       /* if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(this, data);
-                Log.e(TAG, "Place: " + place.getName());
-                autocomplete_place = place.getName().toString();
-                edttxt_places.setText(autocomplete_place);
-
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this, data);
-                // TODO: Handle the error.
-                Log.e(TAG, status.getStatusMessage());
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-
-        }*/
 
         try {
 
@@ -579,17 +540,14 @@ public class MainActivity extends AppCompatActivity
                 case AppConst.GALLERY_PICTURE:
                     if (data == null) return;
                     Uri selectedImage = data.getData();
-                    Log.e("gallery image", String.valueOf(selectedImage));
                     setProfilePicture(String.valueOf(selectedImage));
                     break;
                 case CAMERA_PICTURE:
-                    Log.e("camera image", String.valueOf(mPhotoUri));
                     setProfilePicture(String.valueOf(mPhotoUri));
                     break;
 
                 case AppConst.PLACE_AUTOCOMPLETE_REQUEST_CODE:
                     Place place = PlaceAutocomplete.getPlace(this, data);
-                    Log.e(TAG, "Place: " + place.getName());
                     autocomplete_place = place.getName().toString();
                     edttxt_places.setText(autocomplete_place);
 
@@ -630,7 +588,6 @@ public class MainActivity extends AppCompatActivity
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
         selected_item_id = (int) spinner_marital_status.getSelectedItemId();
-        Log.e("selected item", String.valueOf(selected_item_id));
     }
 
     @Override
@@ -643,13 +600,11 @@ public class MainActivity extends AppCompatActivity
 
         if (checkedId == R.id.radio_btn_male) {
 
-            user_selected_sex = 1;
-            Log.e("selected sex", String.valueOf(user_selected_sex));
+            user_selected_sex = AppConst.USER_SEX_MALE;
 
         } else if (checkedId == R.id.radio_btn_female) {
 
-            user_selected_sex = 2;
-            Log.e("selected sex", String.valueOf(user_selected_sex));
+            user_selected_sex = AppConst.USER_SEX_FEMALE;
         }
     }
 

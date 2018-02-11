@@ -3,7 +3,6 @@ package com.example.ileafdemoapp.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -73,7 +72,6 @@ public class UserDetailsActivity extends AppCompatActivity implements View.OnCli
         user_details_recycler_view.setHasFixedSize(true);
         user_details_recycler_view.setAdapter(new UserDetailAdapter(users, R.layout.recyclerview_item));
         user_details_recycler_view.setLayoutManager(new LinearLayoutManager(this));
-        user_details_recycler_view.setItemAnimator(new DefaultItemAnimator());
 
 
     }
