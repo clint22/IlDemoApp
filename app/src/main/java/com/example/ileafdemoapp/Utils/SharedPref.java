@@ -3,6 +3,8 @@ package com.example.ileafdemoapp.Utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.example.ileafdemoapp.app.MyApplication;
+
 /**
  * Created by Clint on 8/2/18.
  */
@@ -16,7 +18,7 @@ public class SharedPref {
     public static final String SH_REME_PASS = "remembermepass";
     public static final String SH_PREFS_ALREADY_LOGGED = "already_logged_in";
 
-    private static  String SH_PREFS_NAME = "demapp";
+    private static String SH_PREFS_NAME = "demapp";
 
     public static SharedPreferences getAppSharedPref(Context context) {
         if (demoapp == null) {
@@ -35,13 +37,13 @@ public class SharedPref {
         demoapp.edit().putBoolean(SH_REMEMBERME_STATUS, status).apply();
     }
 
-    public static void setRememberMeUserNameandPassword(Context context, String username,String passsword) {
+    public static void setRememberMeUserNameandPassword(Context context, String username, String passsword) {
         demoapp = getAppSharedPref(context);
         demoapp.edit().putString(SH_REM_USERNAME, username).apply();
         demoapp.edit().putString(SH_REME_PASS, passsword).apply();
     }
 
-    public static void setRememberMeUserName(Context context, String username){
+    public static void setRememberMeUserName(Context context, String username) {
 
 
         demoapp = getAppSharedPref(context);
@@ -51,12 +53,12 @@ public class SharedPref {
 
     public static String getRememberMeUserName(Context context) {
         demoapp = getAppSharedPref(context);
-        return  demoapp.getString(SH_REM_USERNAME, "");
+        return demoapp.getString(SH_REM_USERNAME, "");
 
     }
 
 
-    public static void setRememberMePassword(Context context, String password){
+    public static void setRememberMePassword(Context context, String password) {
 
         demoapp = getAppSharedPref(context);
         demoapp.edit().putString(SH_REME_PASS, password).apply();
@@ -65,10 +67,8 @@ public class SharedPref {
     public static String getRememberMePassword(Context context) {
 
         demoapp = getAppSharedPref(context);
-        return  demoapp.getString(SH_REME_PASS, "");
+        return demoapp.getString(SH_REME_PASS, "");
     }
-
-
 
 
     public static void removeRememberMeUserNameandPassword(Context context) {
@@ -90,6 +90,12 @@ public class SharedPref {
     public static void clear(Context context) {
 
 
+//        demoapp.edit().clear().apply();
+        if (getRememberMeLoggedIn_Status(MyApplication.getInstance())) {
+            demoapp.edit().remove(SH_PREFS_ALREADY_LOGGED).apply();
+            return;
+
+        }
 
         demoapp.edit().clear().apply();
 

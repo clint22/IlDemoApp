@@ -106,7 +106,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                     if (strUsername.equals(AppConst.DEFAULT_USER_NAME) && strPassword.equals(AppConst.DEFAULT_PASSWORD)) {
 
-                        SharedPref.setLoggedIn_Status(MyApplication.getInstance(), true);
+                        SharedPref.setLoggedIn_Status(LoginActivity.this, true);
                         SharedPref.setRememberMeUserName(MyApplication.getInstance(), strUsername);
 
 
@@ -117,7 +117,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             SharedPref.setRememberMePassword(MyApplication.getInstance(), strPassword);
 
 
+                        } else {
+                            SharedPref.setRememberMeLoggedIn_Status(MyApplication.getInstance(), false);
                         }
+
 
                         rel_loader.setVisibility(View.VISIBLE);
 

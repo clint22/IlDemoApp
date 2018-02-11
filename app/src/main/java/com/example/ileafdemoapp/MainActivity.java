@@ -449,7 +449,27 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, UserDetailsActivity.class);
             startActivity(intent);
 
+        } else {
+
+            upDateData();
+            Toast.makeText(getApplicationContext(),"User data updated", Toast.LENGTH_SHORT).show();
+            database.userDao().updateUser(user);
+            Intent intent = new Intent(MainActivity.this, UserDetailsActivity.class);
+            startActivity(intent);
+
         }
+    }
+
+    private void upDateData() {
+
+        user.first_name = Validation.getString(edttxt_first_name);
+        user.last_name = Validation.getString(edttxt_last_name);
+        user.email = Validation.getString(edttxt_email);
+        user.date_of_birth = Validation.getString(edttxt_dob);
+        user.marital_status = selected_item_id;
+        user.sex = user_selected_sex;
+        user.location = Validation.getString(edttxt_places);
+        user.age = age;
     }
 
     private boolean validateFields() {
