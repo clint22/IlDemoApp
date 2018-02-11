@@ -1,10 +1,21 @@
 package com.example.ileafdemoapp;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -14,6 +25,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -24,21 +36,28 @@ import android.widget.Toast;
 
 import com.example.ileafdemoapp.Activity.LoginActivity;
 import com.example.ileafdemoapp.Activity.UserDetailsActivity;
+import com.example.ileafdemoapp.Fragments.SelectImageFromFragment;
 import com.example.ileafdemoapp.Network.AppDatabase;
 import com.example.ileafdemoapp.Network.User;
+import com.example.ileafdemoapp.Utils.AppConst;
 import com.example.ileafdemoapp.Utils.SharedPref;
 import com.example.ileafdemoapp.Utils.Validation;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.example.ileafdemoapp.Utils.AppConst.CAMERA_PICTURE;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, AdapterView.OnItemSelectedListener, RadioGroup.OnCheckedChangeListener {
@@ -72,10 +91,9 @@ public class MainActivity extends AppCompatActivity
     EditText edttxt_email;
 
 
-    private NavigationView navigationView;
     private TextView txt_user_email;
-    ;
-    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+    private CircleImageView circleImageView;
+    //    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 3;
     private String TAG = "places";
     private String autocomplete_place;
     private int selected_item_id = 0;
@@ -84,23 +102,52 @@ public class MainActivity extends AppCompatActivity
     private int age;
     private User user;
     private AppDatabase database;
+    private int result_camera;
+    private int result_ext_storage;
+    private Uri mPhotoUri;
+    private Activity activity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        result_camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        result_ext_storage = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+
+        activity = this;
         database = AppDatabase.getDatabase(getApplicationContext());
-        // cleanup for testing some initial data
         database.userDao().removeAllUsers();
 
         initViews();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        View v = navigationView.getHeaderView(0);
+        NavigationView navigationView1 = (NavigationView) findViewById(R.id.nav_view);
+        View v = navigationView1.getHeaderView(0);
         txt_user_email = (TextView) v.findViewById(R.id.txt_user_email);
+        circleImageView = (CircleImageView) v.findViewById(R.id.profile_image);
+
+        circleImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (result_camera != PackageManager.PERMISSION_GRANTED ||
+                        result_ext_storage != PackageManager.PERMISSION_GRANTED) {
+
+                    cameraPermission();
+
+                } else {
+
+                    imageEditClick();
+                }
+
+
+            }
+        });
+
 
         setData();
 
@@ -113,6 +160,148 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void imageEditClick() {
+
+        try {
+            {
+                final SelectImageFromFragment dialogFragment = new SelectImageFromFragment();
+                dialogFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.Dialog_FullScreen);
+                FragmentManager fragmentManager = (this).getSupportFragmentManager();
+                dialogFragment.show(fragmentManager, "Sample Fragment");
+
+                dialogFragment.setListener(new SelectImageFromFragment.CallBack() {
+                    @Override
+                    public void onItemSelected(int selectedType) {
+                        dialogFragment.dismiss();
+                        imageEditItemSelected(selectedType);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void imageEditItemSelected(int selectedType) {
+
+        if (selectedType == CAMERA_PICTURE) {
+          /*  cameraPermission();*/
+            callCameraIntent();
+        } else if (selectedType == AppConst.GALLERY_PICTURE) {
+            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(galleryIntent, AppConst.GALLERY_PICTURE);
+        }
+    }
+
+    private void callCameraIntent() {
+
+
+        mPhotoUri = Validation.getTempUri(MainActivity.this);
+        Log.e("mPhotUri", String.valueOf(mPhotoUri));
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri);
+
+        if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, CAMERA_PICTURE);
+        }
+    }
+
+    private void cameraPermission() {
+
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                Manifest.permission.CAMERA)) {
+
+            if (result_camera != PackageManager.PERMISSION_GRANTED || result_ext_storage != PackageManager.PERMISSION_GRANTED) {
+
+                final Dialog dialog = new Dialog(MainActivity.this);
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.custom_permission_dialog);
+                dialog.setCancelable(false);
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+
+
+                TextView txt_cancel = ButterKnife.findById(dialog, R.id.txt_not_now);
+                TextView txt_continue = ButterKnife.findById(dialog, R.id.txt_continue);
+                TextView txt_description = ButterKnife.findById(dialog, R.id.txt_description);
+                TextView txt_placeholder_title = ButterKnife.findById(dialog, R.id.txt_placeholder_title);
+
+                txt_placeholder_title.setText("CAMERA PERMISSION");
+                txt_description.setText("We need to access your camera and gallery inorder to set the profile picture");
+
+
+                txt_continue.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        dialog.dismiss();
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                AppConst.PERMISSION_REQUEST_CODE_CAMERA);
+
+                    }
+                });
+
+                txt_cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        dialog.dismiss();
+                    }
+                });
+
+
+            }
+
+        } else {
+
+            if (result_camera != PackageManager.PERMISSION_GRANTED || result_ext_storage != PackageManager.PERMISSION_GRANTED) {
+
+                final Dialog dialog = new Dialog(MainActivity.this);
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.custom_permission_dialog);
+                dialog.setCancelable(false);
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+
+
+                TextView txt_cancel = ButterKnife.findById(dialog, R.id.txt_not_now);
+                TextView txt_continue = ButterKnife.findById(dialog, R.id.txt_continue);
+                TextView txt_description = ButterKnife.findById(dialog, R.id.txt_description);
+                TextView txt_placeholder_title = ButterKnife.findById(dialog, R.id.txt_placeholder_title);
+
+                txt_placeholder_title.setText("CAMERA PERMISSION");
+                txt_description.setText("We need to access your camera and gallery inorder to set the profile picture");
+
+
+                txt_continue.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        dialog.dismiss();
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                AppConst.PERMISSION_REQUEST_CODE_CAMERA);
+
+                    }
+                });
+
+                txt_cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        dialog.dismiss();
+                    }
+                });
+            }
+
+        }
+
+
     }
 
     private void initViews() {
@@ -132,7 +321,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -164,7 +353,7 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -185,7 +374,7 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -230,7 +419,7 @@ public class MainActivity extends AppCompatActivity
                     Validation.getString(edttxt_last_name),
                     Validation.getString(edttxt_email),
                     Validation.getString(edttxt_dob),
-                    selected_item_id,user_selected_sex,
+                    selected_item_id, user_selected_sex,
                     Validation.getString(edttxt_places),
                     age));
 
@@ -252,7 +441,7 @@ public class MainActivity extends AppCompatActivity
         } else if (!Validation.hasText(dobWrapper)) {
             return false;
         } else if (user_selected_sex == 0) {
-            Toast.makeText(getApplicationContext(),"please choose a sex",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "please choose a sex", Toast.LENGTH_SHORT).show();
             return false;
         } else if (!Validation.hasText(placesWrapper)) {
             return false;
@@ -281,7 +470,7 @@ public class MainActivity extends AppCompatActivity
 
                         edttxt_dob.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
 
-                        age = getAge(year,monthOfYear,dayOfMonth);
+                        age = getAge(year, monthOfYear, dayOfMonth);
 
                     }
                 }, mYear, mMonth, mDay);
@@ -296,12 +485,11 @@ public class MainActivity extends AppCompatActivity
 
         int age = today.get(Calendar.YEAR) - year;
 
-        if (today.get(Calendar.DAY_OF_YEAR) < year){
+        if (today.get(Calendar.DAY_OF_YEAR) < year) {
             age--;
         }
 
         return age;
-
 
 
     }
@@ -313,7 +501,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent =
                     new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
                             .build(this);
-            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+            startActivityForResult(intent, AppConst.PLACE_AUTOCOMPLETE_REQUEST_CODE);
         } catch (GooglePlayServicesRepairableException e) {
             // TODO: Handle the error.
         } catch (GooglePlayServicesNotAvailableException e) {
@@ -323,7 +511,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+       /* if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(this, data);
                 Log.e(TAG, "Place: " + place.getName());
@@ -338,7 +526,61 @@ public class MainActivity extends AppCompatActivity
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.
             }
+
+        }*/
+
+        try {
+
+            if (resultCode != RESULT_OK) return;
+
+            switch (requestCode) {
+                case AppConst.GALLERY_PICTURE:
+                    if (data == null) return;
+                    Uri selectedImage = data.getData();
+                    Log.e("gallery image", String.valueOf(selectedImage));
+                    setProfilePicture(String.valueOf(selectedImage));
+                    break;
+                case CAMERA_PICTURE:
+                    Log.e("camera image", String.valueOf(mPhotoUri));
+                    setProfilePicture(String.valueOf(mPhotoUri));
+                    break;
+
+                case AppConst.PLACE_AUTOCOMPLETE_REQUEST_CODE:
+                    Place place = PlaceAutocomplete.getPlace(this, data);
+                    Log.e(TAG, "Place: " + place.getName());
+                    autocomplete_place = place.getName().toString();
+                    edttxt_places.setText(autocomplete_place);
+
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+    }
+
+    private void setProfilePicture(String mediaPath) {
+
+
+        try {
+
+
+            Picasso.with(activity)
+                    .load(mediaPath)
+                    .placeholder(R.drawable.default_user_image)
+                    .error(R.drawable.default_user_image)
+                    .fit()
+                    .centerCrop()
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .networkPolicy(NetworkPolicy.NO_CACHE)
+                    .into(circleImageView);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -368,4 +610,31 @@ public class MainActivity extends AppCompatActivity
             Log.e("selected sex", String.valueOf(user_selected_sex));
         }
     }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        if (requestCode == AppConst.PERMISSION_REQUEST_CODE_CAMERA) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                imageEditClick();
+                circleImageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        imageEditClick();
+                    }
+                });
+                Toast.makeText(MainActivity.this, "Permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+
+                Toast.makeText(MainActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
 }

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:background="@color/bg_light_green"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_height="150dp">
+
+        <ImageView
+            android:id="@+id/img_placeholder"
+            android:layout_width="70dp"
+            android:src="@drawable/ic_photo_camera"
+            android:layout_height="70dp"
+            android:layout_gravity="center"
+            />
+
+        <TextView
+            android:id="@+id/txt_placeholder_title"
+            android:layout_width="match_parent"
+            android:padding="10dp"
+            android:textColor="#FAFAFA"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:layout_height="wrap_content" />
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txt_description"
+        android:layout_width="match_parent"
+        android:textColor="#424242"
+        android:layout_marginTop="10dp"
+        android:padding="15dp"
+        android:gravity="left"
+        android:textSize="15sp"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/txt_not_now"
+            android:layout_width="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/colorPrimary"
+            android:text="NOT NOW"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/txt_continue"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:textColor="@color/bg_light_green"
+            android:text="CONTINUE"
+            android:textStyle="bold"
+            android:layout_marginRight="15dp"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+
+
+
+
+
+</LinearLayout>
